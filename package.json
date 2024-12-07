@@ -1,0 +1,17 @@
+{
+    "name": "magiscribe-infrastructure",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+      "postinstall": "concurrently \"cd infrastructure && pnpm install\" \"cd bootstrap && pnpm install\"",
+      "setup": "pnpm install",
+      "lint": "concurrently \"cd infrastructure && pnpm run lint\" \"cd bootstrap && pnpm run lint\"",
+      "lint:fix": "concurrently\"cd infrastructure && pnpm run lint:fix\" \"cd bootstrap && pnpm run lint:fix\"",
+      "format": "concurrently \"cd infrastructure && pnpm run format\" \"cd bootstrap && pnpm run format\"",
+      "check": "concurrently \"cd infrastructure && pnpm run check\" \"cd bootstrap && pnpm run check\"",
+      "fix": "concurrently \"cd infrastructure && pnpm run fix\" \"cd bootstrap && pnpm run fix\""
+    },
+    "dependencies": {
+      "concurrently": "^9.0.1"
+    }
+  }
