@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@cdktf/provider-aws':
-        specifier: 19.44.0
-        version: 19.44.0(cdktf@0.20.10(constructs@10.4.2))(constructs@10.4.2)
+        specifier: 19.46.0
+        version: 19.46.0(cdktf@0.20.10(constructs@10.4.2))(constructs@10.4.2)
       cdktf:
         specifier: ^0.20.10
         version: 0.20.10(constructs@10.4.2)
@@ -21,8 +21,8 @@ importers:
         specifier: ^10.4.2
         version: 10.4.2
       dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
+        specifier: ^16.4.7
+        version: 16.4.7
       esbuild:
         specifier: ^0.24.0
         version: 0.24.0
@@ -261,8 +261,8 @@ packages:
   '@cdktf/node-pty-prebuilt-multiarch@0.10.1-pre.11':
     resolution: {integrity: sha512-qvga/nzEtdCJMu/6jJfDqpzbRejvXtNhWFnbubfuYyN5nMNORNXX+POT4j+mQSDQar5bIQ1a812szw/zr47cfw==}
 
-  '@cdktf/provider-aws@19.44.0':
-    resolution: {integrity: sha512-oWv/w26z1uY27H+0ecGPnEe2+LNLVal/tegBkkbmldkU/1CERwO9rp3+QKSIH+xZ3vcZUPh7zCwf3IhrjPunAg==}
+  '@cdktf/provider-aws@19.46.0':
+    resolution: {integrity: sha512-Mapm2q3LuKxpISj667O7QeNRwevb5mlR1917P7xDvIku+wM/QwveyHpc3omBGgpsO0oYYMEIN0qnUeo+i1pULA==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
       cdktf: ^0.20.0
@@ -1266,8 +1266,8 @@ packages:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
 
-  dotenv@16.4.5:
-    resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
+  dotenv@16.4.7:
+    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
   downlevel-dts@0.11.0:
@@ -2859,8 +2859,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@5.8.0-dev.20241202:
-    resolution: {integrity: sha512-4b4+FbKk5Wp51uwCztSyh68rdK1rv4afoC/P/g8HOmWmfHIdCgZNxzLS6TvjBU7e8XVzmW3jE/CJl1n59lcIhg==}
+  typescript@5.8.0-dev.20241207:
+    resolution: {integrity: sha512-yQ6n2+6pOnqMt7ycrcA5EQXaOxxOkoKirCdQJEF79Hjke53Y+zs9XIwBbA99Hf2CWT7lhAuv2MFifLwTLQQ1BA==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3359,7 +3359,7 @@ snapshots:
       nan: 2.22.0
       prebuild-install: 7.1.2
 
-  '@cdktf/provider-aws@19.44.0(cdktf@0.20.10(constructs@10.4.2))(constructs@10.4.2)':
+  '@cdktf/provider-aws@19.46.0(cdktf@0.20.10(constructs@10.4.2))(constructs@10.4.2)':
     dependencies:
       cdktf: 0.20.10(constructs@10.4.2)
       constructs: 10.4.2
@@ -4571,13 +4571,13 @@ snapshots:
 
   diff@4.0.2: {}
 
-  dotenv@16.4.5: {}
+  dotenv@16.4.7: {}
 
   downlevel-dts@0.11.0:
     dependencies:
       semver: 7.6.3
       shelljs: 0.8.5
-      typescript: 5.8.0-dev.20241202
+      typescript: 5.8.0-dev.20241207
 
   eastasianwidth@0.2.0: {}
 
@@ -6370,7 +6370,7 @@ snapshots:
 
   typescript@5.7.2: {}
 
-  typescript@5.8.0-dev.20241202: {}
+  typescript@5.8.0-dev.20241207: {}
 
   undici-types@5.26.5: {}
 
