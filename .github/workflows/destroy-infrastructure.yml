@@ -1,0 +1,79 @@
+name: Destroy Infrastructure 🧨
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: infrastructure-${{ github.ref == 'refs/heads/main' && 'prod' || 'dev'}}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: "Terraform CDK Destroy"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infrastructure
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: ./infrastructure/pnpm-lock.yaml
+
+      - name: Assume AWS Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate module and provider bindings
+        run: pnpm run get
+
+      - name: Run Terraform CDK
+        uses: hashicorp/terraform-cdk-action@v7
+        with:
+          mode: auto-approve-destroy
+          stackName: api
+          workingDirectory: ./infrastructure
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NODE_ENV: 'demo'
+          # AWS Terraform Backend
+          TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
+          TF_BACKEND_DYNAMODB_TABLE: ${{ secrets.TF_BACKEND_DYNAMODB_TABLE }}
+          TF_BACKEND_REGION: ${{ secrets.TF_BACKEND_REGION }}
+          # Auth Configuration
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          # Domain Configuration
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          # Media Configuration
+          MEDIA_CORS: ${{ secrets.MEDIA_CORS }}
+          # Database Configuration
+          DB_BACKUPS_ENABLED: ${{ secrets.DB_BACKUPS_ENABLED }}
+          DB_PUBLIC_KEY: ${{ secrets.DB_PUBLIC_KEY }}
+          DB_PRIVATE_KEY: ${{ secrets.DB_PRIVATE_KEY }}
+          DB_PROJECT_ID: ${{ secrets.DB_PROJECT_ID }}

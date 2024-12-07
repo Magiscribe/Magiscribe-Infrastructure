@@ -1,0 +1,10 @@
+{
+  "language": "typescript",
+  "app": "npx ts-node -r tsconfig-paths/register --prefer-ts-exts src/index.ts",
+  "projectId": "dc6b9f4e-8ae8-4c33-a5f4-e7c04b71c5ac",
+  "sendCrashReports": "false",
+  "terraformProviders": ["aws@~> 5.0"],
+  "terraformModules": [],
+  "context": {},
+  "watchPattern": ["./**/*.ts"]
+}
