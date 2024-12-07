@@ -1,0 +1,116 @@
+name: PR Checks 🏷️
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, assigned, unassigned, edited, reopened]
+
+jobs:
+  check-label:
+    name: PR Label Check
+    runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Check PR labels
+        id: check_labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(label => label.name);
+            const requiredLabels = ["review ready", "work-in-progress"];
+            const hasRequiredLabel = labels.some(label => requiredLabels.includes(label));
+            if (!hasRequiredLabel) {
+              core.setFailed(`PR must have one of the following labels: ${requiredLabels.join(", ")}`);
+            }
+
+      - name: Set PR status
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context, github } = require('@actions/github');
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+
+            await github.issues.createComment({
+              owner,
+              repo,
+              issue_number: pull_number,
+              body: 'This PR does not have the required label. Please add either "review-ready" or "work-in-progress".'
+            });
+
+  check-assignee:
+    name: PR Assignee Check
+    runs-on: ubuntu-latest
+    needs: check-label
+    if: github.actor != 'dependabot[bot]'
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Check PR assignee
+        id: check_assignee
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const assignees = context.payload.pull_request.assignees;
+            if (assignees.length === 0) {
+              core.setFailed('PR must have at least one assignee.');
+            }
+
+      - name: Set PR status
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context, github } = require('@actions/github');
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+
+            await github.issues.createComment({
+              owner,
+              repo,
+              issue_number: pull_number,
+              body: 'This PR does not have an assignee. Please assign at least one person to this PR.'
+            });
+
+  check-title:
+    name: PR Title Check
+    runs-on: ubuntu-latest
+    needs: check-assignee
+    if: github.actor != 'dependabot[bot]'
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Check PR title
+        id: check_title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const clickUpTaskIdPattern = /^CU-[a-zA-Z0-9]+/;
+            if (!clickUpTaskIdPattern.test(title)) {
+              core.setFailed('PR title must be prefixed with the ClickUp task ID (e.g., CU-86b2rt8c0).');
+            }
+
+      - name: Set PR status
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context, github } = require('@actions/github');
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+
+            await github.issues.createComment({
+              owner,
+              repo,
+              issue_number: pull_number,
+              body: 'This PR title does not contain the required ClickUp task ID prefix (e.g., CU-86b2rt8c0). Please update the title.'
+            });

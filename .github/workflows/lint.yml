@@ -1,0 +1,38 @@
+name: Lint 🔎
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:     
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ['bootstrap', 'infrastructure']
+    defaults:
+      run:
+        working-directory: './${{ matrix.directory }}'
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'          
+          cache-dependency-path: ./${{ matrix.directory }}/pnpm-lock.yaml
+
+      - name: 'Install Dependencies'
+        run: pnpm install
+
+      - name: 'Lint ${{ matrix.directory }}'
+        run: pnpm run check

@@ -1,0 +1,58 @@
+name: Destroy Infrastructure 🧨
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: infrastructure-${{ github.ref == 'refs/heads/main' && 'prod' || 'dev'}}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: "Terraform CDK Destroy"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infrastructure
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: ./infrastructure/pnpm-lock.yaml
+
+      - name: Assume AWS Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ github.ref == 'refs/heads/main' && 'arn:aws:iam::211125562192:role/GitHubAssumeRole' || 'arn:aws:iam::891377366124:role/GitHubAssumeRole' }}
+          aws-region: us-east-1
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate module and provider bindings
+        run: pnpm run get
+
+      - name: Run Terraform CDK
+        uses: hashicorp/terraform-cdk-action@v5
+        with:
+          mode: auto-approve-destroy
+          stackName: api
+          workingDirectory: ./infrastructure
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev'}}
