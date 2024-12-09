@@ -23,7 +23,7 @@
     "node": ">=20.0"
   },
   "dependencies": {
-    "@cdktf/provider-aws": "19.44.0",
+    "@cdktf/provider-aws": "19.46.0",
     "@cdktf/provider-mongodbatlas": "^7.8.0",
     "@cdktf/provider-random": "^11.0.3",
     "aws-lambda": "^1.0.7",
@@ -46,6 +46,6 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.17.0"
+    "typescript-eslint": "^8.18.0"
   }
 }
