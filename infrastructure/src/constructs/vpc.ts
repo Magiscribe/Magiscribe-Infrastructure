@@ -76,6 +76,7 @@ export class VPCConstruct extends Construct {
       },
     });
 
+    // TODO: Get this fuck out of here when possible. This thing breaks like crazy.
     this.nat = new FckNat(this, 'FckNat', {
       name: 'FckNat',
       instanceType: 't4g.nano',
@@ -84,11 +85,13 @@ export class VPCConstruct extends Construct {
       attachSsmPolicy: true,
       dependsOn: [this.natIp],
       subnetId: Fn.element(Token.asList(this.vpc.publicSubnetsOutput), 1),
-      updateRouteTable: true,
-      routeTableId: Fn.element(
-        Token.asList(this.vpc.privateRouteTableIdsOutput),
-        1,
-      ),
+      updateRouteTables: true,
+      routeTablesIds: {
+        'rtb-a': Fn.element(
+          Token.asList(this.vpc.privateRouteTableIdsOutput),
+          1,
+        ),
+      },
     });
   }
 }

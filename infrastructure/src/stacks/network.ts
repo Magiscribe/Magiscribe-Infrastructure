@@ -1,9 +1,11 @@
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { DNSZone } from '@constructs/dns-zone';
+import { SESConstruct } from '@constructs/ses';
 import { VPCConstruct } from '@constructs/vpc';
 import { TagsAddingAspect } from 'aspects/tag-aspect';
 import { Aspects, S3Backend, TerraformStack } from 'cdktf';
 import { Construct } from 'constructs';
+
 import config from '../../bin/config';
 
 interface NetworkStackProps {
@@ -18,6 +20,7 @@ interface NetworkStackProps {
 export default class NetworkStack extends TerraformStack {
   readonly dns: DNSZone;
   readonly vpc: VPCConstruct;
+  readonly ses: SESConstruct;
 
   constructor(scope: Construct, id: string, props: NetworkStackProps) {
     super(scope, id);
@@ -49,6 +52,11 @@ export default class NetworkStack extends TerraformStack {
       publicCidrMask: 20,
       privateCidrMask: 20,
       isolatedCidrMask: 20,
+    });
+
+    this.ses = new SESConstruct(this, 'SES', {
+      domainName,
+      zone: this.dns,
     });
   }
 }

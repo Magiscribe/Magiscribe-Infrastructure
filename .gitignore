@@ -1,0 +1,16 @@
+*.d.ts
+*.js
+node_modules
+cdktf.out
+cdktf.log
+*terraform.*.tfstate*
+.gen
+.terraform
+tsconfig.tsbuildinfo
+!jest.config.js
+!setup.js
+**/dist
+.env
+!.env.example
+newrelic_agent.log
+debug.log

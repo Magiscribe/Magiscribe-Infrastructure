@@ -220,6 +220,10 @@ export default class ApiStack extends TerraformStack {
         // REDIS_HOST: redis.replicationGroup.primaryEndpointAddress,
         // REDIS_PORT: redis.replicationGroup.port.toString(),
 
+        EMAIL_BASE_URL: `https://${domainName}`,
+        EMAIL_FROM_EMAIL: `no-reply@${domainName}`,
+        EMAIL_FROM_NAME: 'Magiscribe',
+
         // TODO: Remove the fucking secrets
         NEW_RELIC_APP_NAME: 'magiscribe',
         NEW_RELIC_DISTRIBUTED_TRACING_ENABLED: 'true',
