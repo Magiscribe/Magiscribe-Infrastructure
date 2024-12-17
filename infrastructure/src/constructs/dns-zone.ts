@@ -38,6 +38,7 @@ export class DNSZone extends Construct {
       name: domainName,
     });
 
+    // Route53 Record for certificate validation.
     const record = new Route53Record(this, 'validation-record', {
       name: '${each.value.name}',
       type: '${each.value.type}',
@@ -47,6 +48,7 @@ export class DNSZone extends Construct {
       allowOverwrite: true,
     });
 
+    // We have to do this because the `for_each` attribute is not supported in the CDKTF (yet).
     record.addOverride(
       'for_each',
       `\${{
@@ -58,6 +60,21 @@ export class DNSZone extends Construct {
             }
           }`,
     );
+
+    const certValidation = new AcmCertificateValidation(
+      this,
+      'certvalidation',
+      {
+        certificateArn: this.defaultCertificate.arn,
+      },
+    );
+    certValidation.addOverride(
+      'validation_record_fqdns',
+      `\${[for record in aws_route53_record.${record.friendlyUniqueId} : record.fqdn]}`,
+    );
+
+    /*================================ MISC Records ==============================*/
+    // We add any MISC records that are passed in the props here.
 
     records?.forEach((staticRecord, i) => {
       new Route53Record(
@@ -73,17 +90,5 @@ export class DNSZone extends Construct {
         },
       );
     });
-
-    const certValidation = new AcmCertificateValidation(
-      this,
-      'certvalidation',
-      {
-        certificateArn: this.defaultCertificate.arn,
-      },
-    );
-    certValidation.addOverride(
-      'validation_record_fqdns',
-      `\${[for record in aws_route53_record.${record.friendlyUniqueId} : record.fqdn]}`,
-    );
   }
 }

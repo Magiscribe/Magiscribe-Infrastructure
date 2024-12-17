@@ -82,6 +82,15 @@ const config: Record<Environment, Config> = {
     },
     dns: {
       apexDomainName: 'dev.magiscribe.com',
+      records: [
+        {
+          name: 'magiscribe.com',
+          records: [
+            'v=spf1 include:amazonses.com -all', // We can send emails from SES
+          ],
+          type: 'TXT',
+        },
+      ],
     },
     data: {
       media: {
@@ -127,7 +136,10 @@ const config: Record<Environment, Config> = {
         },
         {
           name: 'magiscribe.com',
-          records: ['v=spf1 include:zohomail.com -all'],
+          records: [
+            'v=spf1 include:amazonses.com -all', // We can send emails from SES
+            'v=spf1 include:zohomail.com -all', // We can send emails from Zoho
+          ],
           type: 'TXT',
         },
         {
