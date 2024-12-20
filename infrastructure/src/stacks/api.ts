@@ -14,9 +14,24 @@ import DataStack from './data';
 import NetworkStack from './network';
 
 interface ApiStackProps {
+  /**
+   * The network stack.
+   */
   network: NetworkStack;
+
+  /**
+   * The domain name for the API (e.g., api.example.com).
+   */
   domainName: string;
+
+  /**
+   * The allowed CORS origins.
+   */
   corsOrigins: string[];
+
+  /**
+   * The data stack.
+   */
   data: DataStack;
 }
 
@@ -149,6 +164,20 @@ export default class ApiStack extends TerraformStack {
             ],
           }),
         },
+        // Grants access to SES.
+        {
+          name: 'ses-policy',
+          policy: JSON.stringify({
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Effect: 'Allow',
+                Action: ['ses:SendEmail', 'ses:SendRawEmail'],
+                Resource: '*',
+              },
+            ],
+          }),
+        },
         // Grants access to call Bedrock APIs.
         // TODO: Remove this once we have a more fine-grained policy.
         {
@@ -220,8 +249,8 @@ export default class ApiStack extends TerraformStack {
         // REDIS_HOST: redis.replicationGroup.primaryEndpointAddress,
         // REDIS_PORT: redis.replicationGroup.port.toString(),
 
-        EMAIL_BASE_URL: `https://${domainName}`,
-        EMAIL_FROM_EMAIL: `no-reply@${domainName}`,
+        EMAIL_BASE_URL: `https://${config.dns.apexDomainName}`,
+        EMAIL_FROM_EMAIL: `no-reply@${config.dns.apexDomainName}`,
         EMAIL_FROM_NAME: 'Magiscribe',
 
         // TODO: Remove the fucking secrets
