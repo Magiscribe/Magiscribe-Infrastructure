@@ -3,16 +3,18 @@ import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { Route53Record } from '@cdktf/provider-aws/lib/route53-record';
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
 import { Cluster } from '@constructs/ecs-cluster';
-import { PythonFunction } from '@constructs/function';
+import { PythonFunction } from '@constructs/function/docker-function';
 import { LoadBalancer } from '@constructs/loadbalancer';
 import { TagsAddingAspect } from 'aspects/tag-aspect';
 import { Aspects, S3Backend, TerraformStack } from 'cdktf';
 import { Construct } from 'constructs';
 
+import { SnsTopic } from '@cdktf/provider-aws/lib/sns-topic';
+import { SnsTopicSubscription } from '@cdktf/provider-aws/lib/sns-topic-subscription';
+import { NodejsFunction } from '@constructs/function/node-function';
 import config from '../../bin/config';
 import DataStack from './data';
 import NetworkStack from './network';
-import { SnsTopic } from '@cdktf/provider-aws/lib/sns-topic';
 
 interface ApiStackProps {
   /**
@@ -59,6 +61,13 @@ export default class ApiStack extends TerraformStack {
       key: `${id}.tfstate`,
     });
 
+        
+    /*================= SNS =================*/
+    
+    const contactSns = new SnsTopic(this, 'ContactSns', {
+      name: 'contact',
+    });
+
     /*================= LAMBDAS =================*/
 
     const executorFn = new PythonFunction(this, 'PythonExecutor', {
@@ -66,11 +75,19 @@ export default class ApiStack extends TerraformStack {
       timeout: 10,
       memorySize: 1024,
     });
-    
-    /*================= SNS =================*/
-    
-    const contactSns = new SnsTopic(this, 'ContactSns', {
-      name: 'contact',
+
+    const snsLambda = new NodejsFunction(this, 'SnsContactLambda', {
+      path: `${__dirname}/../lambdas/webhook/index.ts`,
+      environment: {
+        // TODO: Move to config
+        WEBHOOK_DISCORD: 'https://discord.com/api/webhooks/1325889134052638851/JPIiI5hsKmJNIPAy7IUlRBpGPcv4f3e9JFpWHsV4nNttlo_J1zNE6Zlm3NIvDSAIuxc3'
+      },
+    });
+    snsLambda.grantInvoke({ principal: 'sns.amazonaws.com', sourceArn: contactSns.arn });
+    new SnsTopicSubscription(this, 'sns-lambda', {
+      topicArn: contactSns.arn,
+      protocol: 'lambda',
+      endpoint: snsLambda.function.arn,
     });
 
     /*================= REDIS =================*/
