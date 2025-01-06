@@ -12,6 +12,7 @@ import { Construct } from 'constructs';
 import config from '../../bin/config';
 import DataStack from './data';
 import NetworkStack from './network';
+import { SnsTopic } from '@cdktf/provider-aws/lib/sns-topic';
 
 interface ApiStackProps {
   /**
@@ -64,6 +65,12 @@ export default class ApiStack extends TerraformStack {
       imageUri: `${data.repositoryPythonExecutor.repository.repositoryUrl}:latest`,
       timeout: 10,
       memorySize: 1024,
+    });
+    
+    /*================= SNS =================*/
+    
+    const contactSns = new SnsTopic(this, 'ContactSns', {
+      name: 'contact',
     });
 
     /*================= REDIS =================*/
@@ -178,6 +185,20 @@ export default class ApiStack extends TerraformStack {
             ],
           }),
         },
+        // Grants access to SNS.
+        {
+          name: 'sns-policy',
+          policy: JSON.stringify({
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Effect: 'Allow',
+                Action: ['sns:Publish'],
+                Resource: contactSns.arn
+              },
+            ],
+          }),
+        },
         // Grants access to call Bedrock APIs.
         // TODO: Remove this once we have a more fine-grained policy.
         {
@@ -252,6 +273,8 @@ export default class ApiStack extends TerraformStack {
         EMAIL_BASE_URL: `https://${config.dns.apexDomainName}`,
         EMAIL_FROM_EMAIL: `no-reply@${config.dns.apexDomainName}`,
         EMAIL_FROM_NAME: 'Magiscribe',
+
+        SNS_CONTACT_ARN: contactSns.arn,
 
         // TODO: Remove the fucking secrets
         NEW_RELIC_APP_NAME: 'magiscribe',
