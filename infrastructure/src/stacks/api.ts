@@ -291,7 +291,7 @@ export default class ApiStack extends TerraformStack {
         EMAIL_FROM_EMAIL: `no-reply@${config.dns.apexDomainName}`,
         EMAIL_FROM_NAME: 'Magiscribe',
 
-        SNS_CONTACT_ARN: contactSns.arn,
+        CONTACT_SNS_TOPIC_ARN: contactSns.arn,
 
         // TODO: Remove the fucking secrets
         NEW_RELIC_APP_NAME: 'magiscribe',
