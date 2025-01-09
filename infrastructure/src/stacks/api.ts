@@ -2,16 +2,16 @@ import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { Route53Record } from '@cdktf/provider-aws/lib/route53-record';
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
+import { SnsTopic } from '@cdktf/provider-aws/lib/sns-topic';
+import { SnsTopicSubscription } from '@cdktf/provider-aws/lib/sns-topic-subscription';
 import { Cluster } from '@constructs/ecs-cluster';
 import { PythonFunction } from '@constructs/function/docker-function';
+import { NodejsFunction } from '@constructs/function/node-function';
 import { LoadBalancer } from '@constructs/loadbalancer';
 import { TagsAddingAspect } from 'aspects/tag-aspect';
 import { Aspects, S3Backend, TerraformStack } from 'cdktf';
 import { Construct } from 'constructs';
 
-import { SnsTopic } from '@cdktf/provider-aws/lib/sns-topic';
-import { SnsTopicSubscription } from '@cdktf/provider-aws/lib/sns-topic-subscription';
-import { NodejsFunction } from '@constructs/function/node-function';
 import config from '../../bin/config';
 import DataStack from './data';
 import NetworkStack from './network';
@@ -83,9 +83,9 @@ export default class ApiStack extends TerraformStack {
         WEBHOOK_DISCORD: 'https://discord.com/api/webhooks/1325889134052638851/JPIiI5hsKmJNIPAy7IUlRBpGPcv4f3e9JFpWHsV4nNttlo_J1zNE6Zlm3NIvDSAIuxc3'
       },
     });
-    snsLambda.grantInvoke({ principal: 'sns.amazonaws.com', sourceArn: contactSns.arn });
+    snsLambda.grantInvoke({ principal: 'sns.amazonaws.com', sourceArn: network.communication.contactSns.arn });
     new SnsTopicSubscription(this, 'sns-lambda', {
-      topicArn: contactSns.arn,
+      topicArn: network.communication.contactSns.arn,
       protocol: 'lambda',
       endpoint: snsLambda.function.arn,
     });
@@ -211,7 +211,7 @@ export default class ApiStack extends TerraformStack {
               {
                 Effect: 'Allow',
                 Action: ['sns:Publish'],
-                Resource: contactSns.arn
+                Resource: network.communication.contactSns.arn
               },
             ],
           }),
@@ -291,7 +291,7 @@ export default class ApiStack extends TerraformStack {
         EMAIL_FROM_EMAIL: `no-reply@${config.dns.apexDomainName}`,
         EMAIL_FROM_NAME: 'Magiscribe',
 
-        CONTACT_SNS_TOPIC_ARN: contactSns.arn,
+        CONTACT_SNS_TOPIC_ARN: network.communication.contactSns.arn,
 
         // TODO: Remove the fucking secrets
         NEW_RELIC_APP_NAME: 'magiscribe',
