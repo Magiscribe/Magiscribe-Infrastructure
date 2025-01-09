@@ -1,13 +1,21 @@
 import * as https from 'https';
+import { SQSClient, DeleteMessageCommand } from '@aws-sdk/client-sqs';
 
-interface SnsEvent {
+interface SqsEvent {
   Records: [
     {
-      Sns: {
-        Subject: string;
-        Message: string;
-        Timestamp: string;
+      body: string;
+      attributes: {
+        ApproximateReceiveCount: string;
+        SentTimestamp: string;
+        SenderId: string;
+        ApproximateFirstReceiveTimestamp: string;
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      messageAttributes: Record<string, any>;
+      messageId: string;
+      receiptHandle: string;
+      eventSourceARN: string;
     },
   ];
 }
@@ -25,15 +33,31 @@ interface DiscordMessage {
 
 const webhookUrl: string = process.env.WEBHOOK_DISCORD || '';
 const url = new URL(webhookUrl);
+const sqsClient = new SQSClient({});
 
-export const handler = (
-  event: SnsEvent,
-): void => {
-  send_message(event);
+export const handler = async (event: SqsEvent): Promise<void> => {
+  console.log('Received event:', JSON.stringify(event, null, 2));
+  await Promise.all(
+    event.Records.map(async (record) => {
+      try {
+        const result = await sqsClient.send(
+          new DeleteMessageCommand({
+            QueueUrl: process.env.QUEUE_URL,
+            ReceiptHandle: record.receiptHandle,
+          }),
+        );
+        await send_message(record);
+        console.log('Message deleted:', JSON.stringify(result, null, 2));
+      } catch (error) {
+        console.error('Error processing message:', error);
+        throw error;
+      }
+    }),
+  );
 };
 
-function send_message(events: SnsEvent): void {
-  const body = create_message(events);
+async function send_message(record: SqsEvent['Records'][0]): Promise<void> {
+  const body = create_message(record);
   const options: https.RequestOptions = {
     host: url.host,
     path: url.pathname,
@@ -45,23 +69,24 @@ function send_message(events: SnsEvent): void {
     },
   };
 
-  const req = https.request(options, (res) => {
-    res.on('error', (e: Error) => {
-      console.log('problem with request: ' + e.message);
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      res.on('error', reject);
+      res.on('end', resolve);
     });
-  });
 
-  req.write(JSON.stringify(body));
-  req.end();
+    req.on('error', reject);
+    req.write(JSON.stringify(body));
+    req.end();
+  });
 }
 
-function create_message(events: SnsEvent): DiscordMessage {
-  const sns = events.Records[0].Sns;
+function create_message(record: SqsEvent['Records'][0]): DiscordMessage {
+  const messageData = JSON.parse(record.body);
 
-  const event = JSON.parse(sns.Message);
-  const name = event.name;
-  const email = event.email;
-  const message = event.message;
+  const name = messageData.name;
+  const email = messageData.email;
+  const message = messageData.message;
 
   return {
     embeds: [
@@ -69,7 +94,9 @@ function create_message(events: SnsEvent): DiscordMessage {
         title: `New message from ${name} (${email})`,
         description: message,
         color: 0xff0000,
-        timestamp: sns.Timestamp,
+        timestamp: new Date(
+          parseInt(record.attributes.SentTimestamp),
+        ).toISOString(),
       },
     ],
   };

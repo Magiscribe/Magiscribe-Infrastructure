@@ -1,14 +1,14 @@
 // source: https://github.com/skorfmann/cdktf-nodejs-function/blob/main/src/index.ts
 // inlined because esbuild is compiled natively and only works on linux for the
 // currently published packages of skorfmann/cdktf-nodejs-function
-import * as path from "path";
-import { TerraformAsset, AssetType } from "cdktf";
-import { Construct } from "constructs";
-import { buildSync } from "esbuild";
-import { LambdaFunction } from "@cdktf/provider-aws/lib/lambda-function";
-import { IamRole } from "@cdktf/provider-aws/lib/iam-role";
-import { IamRolePolicyAttachment } from "@cdktf/provider-aws/lib/iam-role-policy-attachment";
-import { LambdaPermission } from "@cdktf/provider-aws/lib/lambda-permission";
+import * as path from 'path';
+import { TerraformAsset, AssetType } from 'cdktf';
+import { Construct } from 'constructs';
+import { buildSync } from 'esbuild';
+import { LambdaFunction } from '@cdktf/provider-aws/lib/lambda-function';
+import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
+import { IamRolePolicyAttachment } from '@cdktf/provider-aws/lib/iam-role-policy-attachment';
+import { LambdaPermission } from '@cdktf/provider-aws/lib/lambda-permission';
 
 export interface NodejsFunctionProps {
   readonly path: string;
@@ -18,16 +18,16 @@ export interface NodejsFunctionProps {
 const bundle = (workingDirectory: string, entryPoint: string) => {
   buildSync({
     entryPoints: [entryPoint],
-    platform: "node",
-    target: "es2018",
+    platform: 'node',
+    target: 'es2018',
     bundle: true,
-    format: "cjs",
-    sourcemap: "external",
-    outdir: "dist",
+    format: 'cjs',
+    sourcemap: 'external',
+    outdir: 'dist',
     absWorkingDir: workingDirectory,
   });
 
-  return path.join(workingDirectory, "dist");
+  return path.join(workingDirectory, 'dist');
 };
 
 export class NodejsFunction extends Construct {
@@ -59,23 +59,23 @@ export class NodejsFunction extends Construct {
 
     this.bundledPath = path.join(
       distPath,
-      `${path.basename(props.path, ".ts")}.js`
+      `${path.basename(props.path, '.ts')}.js`,
     );
 
-    this.asset = new TerraformAsset(this, "lambda-asset", {
+    this.asset = new TerraformAsset(this, 'lambda-asset', {
       path: distPath,
       type: AssetType.ARCHIVE,
     });
 
     this.function = new LambdaFunction(this, id, {
-        functionName: id,
-        handler: `index.handler`,
-        runtime: "nodejs20.x",
-        filename: this.asset.path,
-        environment: {
-            variables: props.environment,
-        },
-        role: this.role.arn,
+      functionName: id,
+      handler: `index.handler`,
+      runtime: 'nodejs20.x',
+      filename: this.asset.path,
+      environment: {
+        variables: props.environment,
+      },
+      role: this.role.arn,
     });
 
     // Add AWSLambdaBasicExecutionRole
@@ -97,20 +97,19 @@ export class NodejsFunction extends Construct {
       role: this.role.name,
     });
   }
-
-    // GrantInvoke is a method that allows the Lambda function to be invoked by another AWS service
-    public grantInvoke({
+  // GrantInvoke is a method that allows the Lambda function to be invoked by another AWS service
+  public grantInvoke({
+    principal,
+    sourceArn,
+  }: {
+    principal: string;
+    sourceArn: string;
+  }) {
+    new LambdaPermission(this, 'lambda-permission', {
+      action: 'lambda:InvokeFunction',
+      functionName: this.function.functionName,
       principal,
       sourceArn,
-    }: {
-      principal: string;
-      sourceArn: string;
-    }) {
-      new LambdaPermission(this, 'lambda-permission', {
-        action: 'lambda:InvokeFunction',
-        functionName: this.function.functionName,
-        principal,
-        sourceArn,
-      });
-    }
+    });
+  }
 }

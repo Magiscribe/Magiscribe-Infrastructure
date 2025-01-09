@@ -2,11 +2,8 @@ import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { Route53Record } from '@cdktf/provider-aws/lib/route53-record';
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
-import { SnsTopic } from '@cdktf/provider-aws/lib/sns-topic';
-import { SnsTopicSubscription } from '@cdktf/provider-aws/lib/sns-topic-subscription';
 import { Cluster } from '@constructs/ecs-cluster';
 import { PythonFunction } from '@constructs/function/docker-function';
-import { NodejsFunction } from '@constructs/function/node-function';
 import { LoadBalancer } from '@constructs/loadbalancer';
 import { TagsAddingAspect } from 'aspects/tag-aspect';
 import { Aspects, S3Backend, TerraformStack } from 'cdktf';
@@ -61,33 +58,12 @@ export default class ApiStack extends TerraformStack {
       key: `${id}.tfstate`,
     });
 
-        
-    /*================= SNS =================*/
-    
-    const contactSns = new SnsTopic(this, 'ContactSns', {
-      name: 'contact',
-    });
-
     /*================= LAMBDAS =================*/
 
     const executorFn = new PythonFunction(this, 'PythonExecutor', {
       imageUri: `${data.repositoryPythonExecutor.repository.repositoryUrl}:latest`,
       timeout: 10,
       memorySize: 1024,
-    });
-
-    const snsLambda = new NodejsFunction(this, 'SnsContactLambda', {
-      path: `${__dirname}/../lambdas/webhook/index.ts`,
-      environment: {
-        // TODO: Move to config
-        WEBHOOK_DISCORD: 'https://discord.com/api/webhooks/1325889134052638851/JPIiI5hsKmJNIPAy7IUlRBpGPcv4f3e9JFpWHsV4nNttlo_J1zNE6Zlm3NIvDSAIuxc3'
-      },
-    });
-    snsLambda.grantInvoke({ principal: 'sns.amazonaws.com', sourceArn: network.communication.contactSns.arn });
-    new SnsTopicSubscription(this, 'sns-lambda', {
-      topicArn: network.communication.contactSns.arn,
-      protocol: 'lambda',
-      endpoint: snsLambda.function.arn,
     });
 
     /*================= REDIS =================*/
@@ -202,16 +178,20 @@ export default class ApiStack extends TerraformStack {
             ],
           }),
         },
-        // Grants access to SNS.
+        // Grants access to SQS.
         {
-          name: 'sns-policy',
+          name: 'sqs-policy',
           policy: JSON.stringify({
             Version: '2012-10-17',
             Statement: [
               {
                 Effect: 'Allow',
-                Action: ['sns:Publish'],
-                Resource: network.communication.contactSns.arn
+                Action: [
+                  'sqs:SendMessage',
+                  'sqs:GetQueueAttributes',
+                  'sqs:GetQueueUrl',
+                ],
+                Resource: network.communication.discordContactSqs.arn,
               },
             ],
           }),
@@ -291,7 +271,7 @@ export default class ApiStack extends TerraformStack {
         EMAIL_FROM_EMAIL: `no-reply@${config.dns.apexDomainName}`,
         EMAIL_FROM_NAME: 'Magiscribe',
 
-        CONTACT_SNS_TOPIC_ARN: network.communication.contactSns.arn,
+        CONTACT_SQS_TOPIC_URL: network.communication.discordContactSqs.url,
 
         // TODO: Remove the fucking secrets
         NEW_RELIC_APP_NAME: 'magiscribe',

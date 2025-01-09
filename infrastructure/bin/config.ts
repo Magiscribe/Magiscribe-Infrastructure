@@ -139,7 +139,7 @@ const config: Record<Environment, Config> = {
           records: [
             'v=spf1 include:amazonses.com -all', // We can send emails from SES
             'v=spf1 include:zohomail.com -all', // We can send emails from Zoho
-            'google-site-verification=bMiMG1u450oTAqbFF0yBsd_czh6QyRGGCndMkEDFIpU' // Google Search Console (setup through liererkt@gmail.com)
+            'google-site-verification=bMiMG1u450oTAqbFF0yBsd_czh6QyRGGCndMkEDFIpU', // Google Search Console (setup through liererkt@gmail.com)
           ],
           type: 'TXT',
         },

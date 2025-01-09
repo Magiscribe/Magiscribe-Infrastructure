@@ -1,5 +1,4 @@
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
-import { SnsTopic } from '@cdktf/provider-aws/lib/sns-topic';
 import { CommunicationConstruct } from '@constructs/communication';
 import { DNSZone } from '@constructs/dns-zone';
 import { SESConstruct } from '@constructs/ses';
