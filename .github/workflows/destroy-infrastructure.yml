@@ -48,7 +48,7 @@ jobs:
         run: pnpm run get
 
       - name: Run Terraform CDK
-        uses: hashicorp/terraform-cdk-action@v6
+        uses: hashicorp/terraform-cdk-action@v7
         with:
           mode: auto-approve-destroy
           stackName: api
