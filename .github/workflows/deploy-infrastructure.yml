@@ -27,6 +27,11 @@ jobs:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
 
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -40,7 +45,7 @@ jobs:
       - name: Assume AWS Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ github.ref == 'refs/heads/main' && 'arn:aws:iam::211125562192:role/GitHubAssumeRole' || 'arn:aws:iam::891377366124:role/GitHubAssumeRole' }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Install dependencies
@@ -58,4 +63,20 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           commentOnPr: false
         env:
-          NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev'}}
+          NODE_ENV: 'demo'
+          # AWS Terraform Backend
+          TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
+          TF_BACKEND_DYNAMODB_TABLE: ${{ secrets.TF_BACKEND_DYNAMODB_TABLE }}
+          TF_BACKEND_REGION: ${{ secrets.TF_BACKEND_REGION }}
+          # Auth Configuration
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          # Domain Configuration
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          # Media Configuration
+          MEDIA_CORS: ${{ secrets.MEDIA_CORS }}
+          # Database Configuration
+          DB_BACKUPS_ENABLED: ${{ secrets.DB_BACKUPS_ENABLED }}
+          DB_PUBLIC_KEY: ${{ secrets.DB_PUBLIC_KEY }}
+          DB_PRIVATE_KEY: ${{ secrets.DB_PRIVATE_KEY }}
+          DB_PROJECT_ID: ${{ secrets.DB_PROJECT_ID }}

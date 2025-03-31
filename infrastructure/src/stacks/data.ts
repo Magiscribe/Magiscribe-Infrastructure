@@ -119,12 +119,12 @@ export default class DataStack extends TerraformStack {
         {
           id: 'ExpireOldAudioFiles',
           status: 'Enabled',
-          expiration: {
-            days: 1,
-          },
-          filter: {
+          expiration: [{
+            days: 30,
+          }],
+          filter: [{
             prefix: 'audio/',
-          },
+          }],
         },
       ],
     });

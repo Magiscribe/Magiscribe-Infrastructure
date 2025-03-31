@@ -1,6 +1,10 @@
+import * as dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+
 enum Environment {
-  Development = 'dev',
-  Production = 'prod',
+  Demo = 'demo',
 }
 
 interface Config {
@@ -67,142 +71,48 @@ interface Config {
   };
 }
 
+/**
+ * Gets a required environment variable or throws an error if it's not set
+ * @param key The environment variable name
+ * @param description Optional description for the error message
+ * @returns The environment variable value
+ */
+function getRequiredEnv(key: string, description?: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Required environment variable ${key} is not set${description ? ` - ${description}` : ''}`);
+  }
+  return value;
+}
+
 const config: Record<Environment, Config> = {
-  dev: {
+  demo: {
     region: 'us-east-1',
     terraformBackend: {
-      bucket: 'remote-terraform-state20240520152449090900000001',
-      dynamodbTable: 'remote-terraform-state-lock',
-      region: 'us-east-1',
+      bucket: getRequiredEnv('TF_BACKEND_BUCKET', 'The S3 bucket for Terraform state'),
+      dynamodbTable: getRequiredEnv('TF_BACKEND_DYNAMODB_TABLE', 'The DynamoDB table for Terraform state lock'),
+      region: process.env.TF_BACKEND_REGION || 'us-east-1',
     },
     auth: {
-      publishableKey:
-        'pk_test_cm9tYW50aWMtaW5zZWN0LTUxLmNsZXJrLmFjY291bnRzLmRldiQ',
-      secretKey: 'sk_test_sPR7HV6vs4y71XdEUFhq00LpNfLizrEXAmfntQsrUn',
+      publishableKey: getRequiredEnv('CLERK_PUBLISHABLE_KEY', 'Clerk publishable key'),
+      secretKey: getRequiredEnv('CLERK_SECRET_KEY', 'Clerk secret key'),
     },
     dns: {
-      apexDomainName: 'dev.magiscribe.com',
-      records: [
-        {
-          name: 'magiscribe.com',
-          records: [
-            'v=spf1 include:amazonses.com -all', // We can send emails from SES
-          ],
-          type: 'TXT',
-        },
-      ],
+      apexDomainName: getRequiredEnv('DOMAIN_NAME', 'The apex domain name'),
+      records: [],
     },
     data: {
       media: {
-        cors: ['http://localhost:*'],
+        cors: [getRequiredEnv('MEDIA_CORS', 'CORS origin for media')],
       },
       db: {
-        backupsEnabled: false,
-        publicKey: 'tywsqgup',
-        privateKey: '62e2857c-72bf-43b7-abb4-c6a2c8fea359',
-        projectId: '665caf78bdea6c1a9ef26d7c',
-      },
-    },
-  },
-  prod: {
-    region: 'us-east-1',
-    terraformBackend: {
-      bucket: 'remote-terraform-state20240516031320666400000001',
-      dynamodbTable: 'remote-terraform-state-lock',
-      region: 'us-east-1',
-    },
-    auth: {
-      publishableKey: 'pk_live_Y2xlcmsubWFnaXNjcmliZS5jb20k',
-      secretKey: 'sk_live_UCIF9TxfUrNqnb2mUZR8pZL773GtSbeQqS8TRbBczE',
-    },
-    dns: {
-      apexDomainName: 'magiscribe.com',
-      records: [
-        // Zoho
-        {
-          name: '5d9t1nn3h9',
-          records: ['zmverify.zoho.com'],
-          type: 'CNAME',
-        },
-        {
-          name: 'magiscribe.com',
-          records: ['10 mx.zoho.com', '20 mx2.zoho.com', '50 mx3.zoho.com'],
-          type: 'MX',
-        },
-        {
-          name: 'zb34522179',
-          records: ['zmverify.zoho.com'],
-          type: 'CNAME',
-        },
-        {
-          name: 'magiscribe.com',
-          records: [
-            'v=spf1 include:amazonses.com -all', // We can send emails from SES
-            'v=spf1 include:zohomail.com -all', // We can send emails from Zoho
-            'google-site-verification=bMiMG1u450oTAqbFF0yBsd_czh6QyRGGCndMkEDFIpU', // Google Search Console (setup through liererkt@gmail.com)
-          ],
-          type: 'TXT',
-        },
-        {
-          name: 'zmail._domainkey',
-          records: [
-            'v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCGtPphJ3um+g5eozujCFObJPrmUHtn+vKCj6K+XZRVtigLKwdlf5DYrsqX2cddAO65SJxc0OBzur++xFi8lf6+iC3ZQHLNggjJGcj2qt3xUvJKJcHG/Eo+y//sh1BWyL3ZIvm+c7Qqxcv7pqr/Qspbinq0M9rcLzlqXeBR2rFzFQIDAQAB',
-          ],
-          type: 'TXT',
-        },
-
-        // Clerk
-        {
-          name: 'clerk',
-          records: ['frontend-api.clerk.services'],
-          type: 'CNAME',
-        },
-        {
-          name: 'clk2._domainkey',
-          records: ['dkim2.ykui03l9x0ov.clerk.services'],
-          type: 'CNAME',
-        },
-        {
-          name: 'clk._domainkey',
-          records: ['dkim1.ykui03l9x0ov.clerk.services'],
-          type: 'CNAME',
-        },
-        {
-          name: 'clkmail',
-          records: ['mail.ykui03l9x0ov.clerk.services'],
-          type: 'CNAME',
-        },
-        {
-          name: 'accounts',
-          records: ['accounts.clerk.services'],
-          type: 'CNAME',
-        },
-
-        // dev.magiscribe.com
-        {
-          name: 'dev',
-          records: [
-            'ns-187.awsdns-23.com.',
-            'ns-919.awsdns-50.net.',
-            'ns-1664.awsdns-16.co.uk.',
-            'ns-1113.awsdns-11.org.',
-          ],
-          type: 'NS',
-        },
-      ],
-    },
-    data: {
-      media: {
-        cors: ['https://magiscribe.com'],
-      },
-      db: {
-        backupsEnabled: true,
-        publicKey: 'aoajfedt',
-        privateKey: '1ff1b1ab-3d43-461f-80ae-1b5fa61904b8',
-        projectId: '665fbb59b0b7bf7406fc2b0e',
+        backupsEnabled: process.env.DB_BACKUPS_ENABLED === 'true',
+        publicKey: getRequiredEnv('DB_PUBLIC_KEY', 'MongoDB public key'),
+        privateKey: getRequiredEnv('DB_PRIVATE_KEY', 'MongoDB private key'),
+        projectId: getRequiredEnv('DB_PROJECT_ID', 'MongoDB project ID'),
       },
     },
   },
 };
 
-export default config[(process.env.NODE_ENV || 'dev') as Environment];
+export default config[(process.env.NODE_ENV || 'demo') as Environment];
