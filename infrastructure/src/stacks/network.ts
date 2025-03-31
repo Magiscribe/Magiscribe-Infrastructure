@@ -1,5 +1,4 @@
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
-import { CommunicationConstruct } from '@constructs/communication';
 import { DNSZone } from '@constructs/dns-zone';
 import { SESConstruct } from '@constructs/ses';
 import { VPCConstruct } from '@constructs/vpc';
@@ -22,7 +21,6 @@ export default class NetworkStack extends TerraformStack {
   readonly dns: DNSZone;
   readonly vpc: VPCConstruct;
   readonly ses: SESConstruct;
-  readonly communication: CommunicationConstruct;
 
   constructor(scope: Construct, id: string, props: NetworkStackProps) {
     super(scope, id);
@@ -60,7 +58,5 @@ export default class NetworkStack extends TerraformStack {
       domainName,
       zone: this.dns,
     });
-
-    this.communication = new CommunicationConstruct(this, 'Communication');
   }
 }

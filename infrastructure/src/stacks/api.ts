@@ -178,24 +178,6 @@ export default class ApiStack extends TerraformStack {
             ],
           }),
         },
-        // Grants access to SQS.
-        {
-          name: 'sqs-policy',
-          policy: JSON.stringify({
-            Version: '2012-10-17',
-            Statement: [
-              {
-                Effect: 'Allow',
-                Action: [
-                  'sqs:SendMessage',
-                  'sqs:GetQueueAttributes',
-                  'sqs:GetQueueUrl',
-                ],
-                Resource: network.communication.discordContactSqs.arn,
-              },
-            ],
-          }),
-        },
         // Grants access to call Bedrock APIs.
         // TODO: Remove this once we have a more fine-grained policy.
         {
@@ -270,8 +252,6 @@ export default class ApiStack extends TerraformStack {
         EMAIL_BASE_URL: `https://${config.dns.apexDomainName}`,
         EMAIL_FROM_EMAIL: `no-reply@${config.dns.apexDomainName}`,
         EMAIL_FROM_NAME: 'Magiscribe',
-
-        CONTACT_SQS_TOPIC_URL: network.communication.discordContactSqs.url,
 
         // TODO: Remove the fucking secrets
         NEW_RELIC_APP_NAME: 'magiscribe',
