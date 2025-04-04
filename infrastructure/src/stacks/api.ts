@@ -253,11 +253,11 @@ export default class ApiStack extends TerraformStack {
         EMAIL_FROM_EMAIL: `no-reply@${config.dns.apexDomainName}`,
         EMAIL_FROM_NAME: 'Magiscribe',
 
-        // TODO: Remove the fucking secrets
-        NEW_RELIC_APP_NAME: 'magiscribe',
-        NEW_RELIC_DISTRIBUTED_TRACING_ENABLED: 'true',
-        NEW_RELIC_LICENSE_KEY: '3a603d0ce9a9f66822a4977c85dc875fFFFFNRAL',
-        NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLE: 'true',
+        // Uncomment to enable new relic
+        // NEW_RELIC_APP_NAME: 'magiscribe',
+        // NEW_RELIC_DISTRIBUTED_TRACING_ENABLED: 'true',
+        // NEW_RELIC_LICENSE_KEY: 'NEW-RELIC-KEY',
+        // NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLE: 'true',
 
         MEDIA_ASSETS_BUCKET_NAME: data.s3Bucket.bucket,
       },
