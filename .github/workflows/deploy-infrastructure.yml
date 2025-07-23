@@ -29,8 +29,6 @@ jobs:
 
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.10.5"
 
       - uses: pnpm/action-setup@v4
         with:
