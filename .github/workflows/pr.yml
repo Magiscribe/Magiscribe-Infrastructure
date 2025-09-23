@@ -12,11 +12,11 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check PR labels
         id: check_labels
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const labels = context.payload.pull_request.labels.map(label => label.name);
@@ -28,7 +28,7 @@ jobs:
 
       - name: Set PR status
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { context, github } = require('@actions/github');
@@ -50,11 +50,11 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check PR assignee
         id: check_assignee
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const assignees = context.payload.pull_request.assignees;
@@ -64,7 +64,7 @@ jobs:
 
       - name: Set PR status
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { context, github } = require('@actions/github');
@@ -86,11 +86,11 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check PR title
         id: check_title
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const title = context.payload.pull_request.title;
@@ -101,7 +101,7 @@ jobs:
 
       - name: Set PR status
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { context, github } = require('@actions/github');
