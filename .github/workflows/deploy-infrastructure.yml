@@ -56,7 +56,7 @@ jobs:
       - name: Run Terraform CDK
         uses: hashicorp/terraform-cdk-action@v11
         with:
-          terraform_version: 1.13.5
+          terraformVersion: 1.13.5
           mode: auto-approve-apply
           stackName: network data api client-dashboard
           workingDirectory: ./infrastructure
