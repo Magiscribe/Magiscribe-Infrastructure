@@ -38,7 +38,9 @@ jobs:
           cache-dependency-path: ./infrastructure/pnpm-lock.yaml
 
       - uses: hashicorp/setup-terraform@v3
-
+        with:
+          terraform_version: 1.13.5
+        
       - name: Assume AWS Role
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -54,6 +56,7 @@ jobs:
       - name: Run Terraform CDK
         uses: hashicorp/terraform-cdk-action@v11
         with:
+          terraform_version: 1.13.5
           mode: auto-approve-apply
           stackName: network data api client-dashboard
           workingDirectory: ./infrastructure
