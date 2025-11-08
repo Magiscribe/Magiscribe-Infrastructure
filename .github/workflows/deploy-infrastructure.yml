@@ -27,9 +27,6 @@ jobs:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
 
-      - name: 'Setup Terraform'
-        uses: hashicorp/setup-terraform@v3
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -39,6 +36,8 @@ jobs:
           node-version: 20
           cache: 'pnpm'          
           cache-dependency-path: ./infrastructure/pnpm-lock.yaml
+
+      - uses: hashicorp/setup-terraform@v3
 
       - name: Assume AWS Role
         uses: aws-actions/configure-aws-credentials@v5
