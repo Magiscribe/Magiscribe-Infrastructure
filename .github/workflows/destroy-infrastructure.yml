@@ -28,7 +28,7 @@ jobs:
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.10.5"
+          terraform_version: 1.13.5
 
       - uses: pnpm/action-setup@v4
         with:
@@ -55,6 +55,7 @@ jobs:
       - name: Run Terraform CDK
         uses: hashicorp/terraform-cdk-action@v11
         with:
+          terraformVersion: 1.13.5
           mode: auto-approve-destroy
           stackName: api
           workingDirectory: ./infrastructure
