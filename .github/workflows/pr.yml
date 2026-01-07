@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Check PR labels
         id: check_labels
@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Check PR assignee
         id: check_assignee
@@ -86,7 +86,7 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Check PR title
         id: check_title
